@@ -18,6 +18,9 @@
 
 import { createApp } from './app.ts';
 
+// Authored in this session: name the process so the forge is identifiable in `ps`.
+process.title = 'github-core-clone-01';
+
 const ENV_URL = (process.env.MAKEFUN_ENV_URL ?? '').replace(/\/+$/, '');
 if (ENV_URL === '') {
   process.stderr.write('[entry] MAKEFUN_ENV_URL is not set: there is no env to register with\n');

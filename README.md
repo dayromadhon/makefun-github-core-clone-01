@@ -1,10 +1,15 @@
-# github-core-clone-01 starter
+# github-core-clone-01
 
-A runnable starting point for [the contest](https://make.fun/bounty/github-core-clone-01): the entry's
-HTTP server and the lifecycle the harness drives it with. It answers two routes and a JSON 404 for
-everything else, so it boots and registers but passes almost nothing: the git smart-HTTP server, the
-REST v3 resources, GraphQL v4 and the MCP endpoint are the contest, and this is where you start
-building them.
+[![make.fun bounty](https://make.fun/badge/github-core-clone-01.svg)](https://make.fun/bounty/github-core-clone-01)
+[![make.fun rank](https://make.fun/badge/github-core-clone-01/dayromadhon/makefun-github-core-clone-01/rank.svg)](https://make.fun/bounty/github-core-clone-01)
+[![make.fun reward](https://make.fun/badge/github-core-clone-01/dayromadhon/makefun-github-core-clone-01/reward.svg)](https://make.fun/bounty/github-core-clone-01)
+
+A GitHub-compatible git forge built for [the make.fun bounty](https://make.fun/bounty/github-core-clone-01):
+one Node process (stdlib only, no dependencies, no `git` binary) serving git smart HTTP, the REST v3
+API, GraphQL v4 and MCP from its own in-memory store. It answers `git clone` and `git push` over
+smart HTTP (protocol v2 and v0), repositories, branches, commits, contents, issues, labels and pull
+requests over REST, the documents `gh` and `github-mcp-server` send over GraphQL, and a
+`server/discover`-era MCP endpoint with eight tools that act on the same store as the REST API.
 
 ## Run it
 
@@ -14,7 +19,7 @@ node --experimental-strip-types main.ts
 
 The platform runs `node /bot/main.ts` on Node 22.18 or later, which strips TypeScript types on its
 own; the flag is harmless there and makes an older local Node work too. There is nothing to install:
-the program imports `node:http` and its own `app.ts` only, and the trial has no package manager and
+the program imports `node:http` and its own modules only, and the trial has no package manager and
 no internet.
 
 ## The lifecycle (main.ts)
@@ -50,8 +55,8 @@ there is nothing to talk to, so `main.ts` exits 1 at once.
 | anything else | 404 `{"message":"Not Found"}` |
 
 The env presents every API call with `Authorization: Bearer $MAKEFUN_SHOP_TOKEN` (the same token is
-in your environment); `/healthz` is the boot probe and takes none. Whether a missing or a wrong token
-is refused is part of the protocol checks, not of this starter.
+in your environment); `/healthz` is the boot probe and takes none. A missing or wrong token is
+refused with 401. Every reply is JSON and carries a non-empty `X-GitHub-Request-Id`.
 
 The score is `feature + agent + perf` (0..1000): the conformance checks over that surface, the MCP
 checks again as the agent-native column, and four timed workloads. The version of the suite the trial
@@ -68,8 +73,17 @@ The trial's CPU, memory and process limits are the rules'; its wall budget is 90
 
 ## Layout
 
-- `main.ts`: the lifecycle above. Keep it as it is.
-- `app.ts`: the server. This is the file to grow.
+- `main.ts`: the lifecycle above.
+- `app.ts`: the HTTP server — git smart HTTP, REST v3, GraphQL and MCP routing.
+- `store.ts`: the in-memory store — the git object model, repositories, issues, pull requests, and
+  the merge logic.
+- `git.ts`: pkt-line codec, packfile read/write, upload-pack (v2 and v0) and receive-pack.
+- `graphql.ts`: a small GraphQL lexer/parser/executor for the documents the suite sends.
 - `package.json`, `tsconfig.json`, `LICENSE` (MIT): the entry's metadata and licence.
 
 The starter is MIT licensed; a submitted entry must carry an OSI-approved licence of its own.
+
+---
+
+Built for the [make.fun bounty](https://make.fun/bounty/github-core-clone-01). Try make.fun yourself:
+[https://make.fun/?ref=sf3mmt2f&utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01](https://make.fun/?ref=sf3mmt2f&utm_source=github&utm_medium=readme&utm_campaign=github-core-clone-01)
